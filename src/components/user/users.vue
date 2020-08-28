@@ -339,7 +339,6 @@ export default {
     },
     /**快改提交 */
     fastEditSubmit(index,id){
-      var that=this
       if(this.table.fastForm.length <= 1){this.$message.error('快速编辑失败');return}
       if(!this.table.fastForm.editData){this.$message.error('请输入数据!');return}
       if(this.table.fastForm.OriginalData == this.table.fastForm.editData){this.$message.info('数据相同不会更改哦');return}
@@ -347,10 +346,10 @@ export default {
       this.table.fastForm.status = true
       console.log(`提交的编辑数据`,this.table.fastForm);/**提交的编辑数据 */
       setTimeout(()=>{
-        that.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
+        this.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
         this.imitateClick(index,id,()=>{
           this.table.fastForm.status = false
-          that.$message.success('success!')
+          this.$message.success('success!')
         })
       },1000)
     },
@@ -364,7 +363,7 @@ export default {
     /**快改取消 */
     fastEditReset(index,id){
       this.imitateClick(index,id,()=>{
-        that.$message.success('success!')
+        this.$message.success('success!')
       })
     },
     /**开关 */
