@@ -1,6 +1,11 @@
 import FileSaver from 'file-saver'
 import XLSX from 'xlsx'
-
+/**
+ * 导出excel
+ * @param {表格的id} table_id 
+ * 注意:
+ * 1. 表格中有field定位属性,将会导出两份(建议去除定位)
+ */
 function exportExcel(table_id) {
   let xlsxParam = {
     raw: true

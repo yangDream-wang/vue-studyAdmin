@@ -8,6 +8,10 @@ import qs from 'qs'; // 根据需求是否导入qs模块
 function login(params) {
   return axios.post(`login`, qs.stringify(params));
 }
+function getMenus(params) {
+  return axios.get(`menus`);
+}
+
 export default{
-  login,
+  login, getMenus
 } 

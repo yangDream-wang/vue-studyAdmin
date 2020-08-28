@@ -11,9 +11,9 @@
 -->
 <template>
   <div class='Users height-100'>
-    <div class="width-100 bg-white padding-lr-sm">
+    <div class="width-100 padding-lr-sm">
       <div class="width-100 flex justify-between">
-        <div class="flex padding-tb-sm">
+        <div class="flex padding-bottom-sm">
           <el-tooltip class="item" effect="dark" content="刷新" placement="top">
             <el-button size="mini" plain icon="el-icon-refresh" @click="refresh"></el-button>
           </el-tooltip>
@@ -45,8 +45,38 @@
         <el-table-column prop="id" sortable label="ID" width="100"/>
         <el-table-column prop="username" label="姓名"/>
         <el-table-column prop="role_name" label="角色"/>
-        <el-table-column prop="mobile" label="手机号"/>
-        <el-table-column prop="email" label="邮箱"/>
+        <el-table-column prop="mobile" label="手机号">
+          <template slot-scope="{row,column,$index}"> <!-- 快速编辑 start-->
+            <el-popover placement="top-start" width="250" trigger="click"> 
+              <div class="flex align-center width-100">
+                <div class="width-60 padding-right-sm"><el-input v-model="table.fastForm.editData" size="mini" clearable prefix-icon="el-icon-edit" @keyup.enter.native="fastEditSubmit($index,column.id)"></el-input></div>
+                <div class="width-40">
+                  <el-button-group>
+                    <el-button type="success" :loading="table.fastForm.status" icon="el-icon-check" size="mini" @click="fastEditSubmit($index,column.id)"></el-button>
+                    <el-button type="info" icon="el-icon-close" size="mini" plain @click="fastEditReset($index,column.id)"></el-button>
+                  </el-button-group>
+                </div>
+              </div>
+              <el-button type="text" slot="reference" :id="'popover' + $index + column.id">{{row.mobile}}</el-button>
+            </el-popover>
+          </template><!-- 快速编辑 end-->
+        </el-table-column>
+        <el-table-column prop="email" label="邮箱">
+          <template slot-scope="{row,column,$index}"> <!-- 快速编辑 start-->
+            <el-popover placement="top-start" width="250" trigger="click"> 
+              <div class="flex align-center width-100">
+                <div class="width-60 padding-right-sm"><el-input v-model="table.fastForm.editData" size="mini" clearable prefix-icon="el-icon-edit" @keyup.enter.native="fastEditSubmit($index,column.id)"></el-input></div>
+                <div class="width-40">
+                  <el-button-group>
+                    <el-button type="success" :loading="table.fastForm.status" icon="el-icon-check" size="mini" @click="fastEditSubmit($index,column.id)"></el-button>
+                    <el-button type="info" icon="el-icon-close" size="mini" plain @click="fastEditReset($index,column.id)"></el-button>
+                  </el-button-group>
+                </div>
+              </div>
+              <el-button type="text" slot="reference" :id="'popover' + $index + column.id">{{row.email}}</el-button>
+            </el-popover>
+          </template><!-- 快速编辑 end-->
+        </el-table-column>
         <el-table-column label="创建时间" sortable prop="create_time">
           <template slot-scope="{row}">
             {{row.create_time | forDate(1)}}
@@ -175,6 +205,7 @@ export default {
           /**添加时没有id,编辑时有id */
           form:{},
         },
+        fastForm:{editData:'',status:false},
         pagination:{
           /**当前页码 */
           currentPage:1,
@@ -295,18 +326,46 @@ export default {
         this.showHideForm('','',0,()=>{
           this.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
         })
-      }else{
-        this.$message.error(msg)
-      }
+      }else{ this.$message.error(msg) }
     },
     /**快改 */
     fastEdit(row, column){
-      // const {id} = row
-      // const {property} = column
-      // const fromDate = row[property]
-      // console.log(id);
-      // console.log(property);
-      // console.log(fromDate);
+      this.table.fastForm = {editData:'',status:false}
+      const {id} = row
+      const {property} = column
+      const fromDate = row[property]
+      const fastEditData = { id:id, field:property, OriginalData:fromDate }
+      this.table.fastForm = {...this.table.fastForm,...fastEditData}
+    },
+    /**快改提交 */
+    fastEditSubmit(index,id){
+      var that=this
+      if(this.table.fastForm.length <= 1){this.$message.error('快速编辑失败');return}
+      if(!this.table.fastForm.editData){this.$message.error('请输入数据!');return}
+      if(this.table.fastForm.OriginalData == this.table.fastForm.editData){this.$message.info('数据相同不会更改哦');return}
+      if(this.table.fastForm.hasOwnProperty('OriginalData')){delete this.table.fastForm.OriginalData}
+      this.table.fastForm.status = true
+      console.log(`提交的编辑数据`,this.table.fastForm);/**提交的编辑数据 */
+      setTimeout(()=>{
+        that.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
+        this.imitateClick(index,id,()=>{
+          this.table.fastForm.status = false
+          that.$message.success('success!')
+        })
+      },1000)
+    },
+    /**快改 模拟点击方法*/
+    imitateClick(index,id,fn){
+      var e = document.createEvent('MouseEvents')
+      e.initEvent('click', true, true)
+      document.getElementById('popover'+index+id).dispatchEvent(e)
+      return typeof fn == 'function' && fn()
+    },
+    /**快改取消 */
+    fastEditReset(index,id){
+      this.imitateClick(index,id,()=>{
+        that.$message.success('success!')
+      })
     },
     /**开关 */
     async switchStatus(item){

@@ -10,10 +10,10 @@
   修改时间：
 -->
 <template>
-  <div class='Users height-100'>
+  <div class='Role height-100'>
     <div class="width-100">
       <div class="width-100 flex justify-between">
-        <div class="flex padding-tb-sm">
+        <div class="flex padding-bottom-sm">
           <el-tooltip class="item" effect="dark" content="刷新" placement="top">
             <el-button size="mini" plain icon="el-icon-refresh" @click="refresh"></el-button>
           </el-tooltip>
@@ -37,33 +37,27 @@
       stripe:显示斑马纹
       border:显示边框(可以拖动列宽)
       @selection-change:多选改变事件
-      @cell-click="fastEdit":点击某一个单元格事件
-      
       -->
-      <el-table id="table" ref="table" :data="table.dataList" highlight-current-row stripe border @selection-change="selectionChange" @cell-click="fastEdit">
+      <el-table id="table" ref="table" height="80vh" :data="table.dataList" highlight-current-row stripe border @selection-change="selectionChange" >
+        <el-table-column type="expand">
+          <template slot-scope="{row}">
+            <span v-if="row.children.length != 0">
+              <tree-role-list :data="row.children" :row="row"></tree-role-list>
+            </span>
+            <span v-if="row.children.length == 0">未分配权限</span>
+          </template>
+        </el-table-column>
         <el-table-column type="selection" width="50"></el-table-column>
         <el-table-column prop="id" sortable label="ID" width="100"/>
-        <el-table-column prop="username" label="姓名"/>
-        <el-table-column prop="role_name" label="角色"/>
-        <el-table-column prop="mobile" label="手机号"/>
-        <el-table-column prop="email" label="邮箱"/>
-        <el-table-column label="创建时间" sortable prop="create_time">
-          <template slot-scope="{row}">
-            {{row.create_time | forDate(1)}}
-          </template>
-        </el-table-column>
-        <el-table-column label="状态" width="100">
-          <template slot-scope="{row}">
-            <el-switch v-model="row.mg_state" active-color="#13ce66" inactive-color="#CCCCCC" @change="switchStatus(row)"></el-switch>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" fixed="right" min-width="200" max-width="300">
+        <el-table-column prop="roleName" label="角色名称"/>
+        <el-table-column prop="roleDesc" label="角色描述"/>
+        <el-table-column label="操作" fixed="right" width="300">
           <template slot-scope="{row,$index}">
             <el-button type="primary" icon="el-icon-edit" circle plain @click="showHideForm(row,$index,0)" style="margin-right:10px;"></el-button>
             <el-popconfirm confirmButtonText='删除' cancelButtonText='再想想' icon="el-icon-info" iconColor="red" title="确定删除吗？" @onConfirm="del(row,$index)">
               <el-button slot="reference" type="danger" icon="el-icon-delete" circle plain></el-button>
             </el-popconfirm>
-            <el-button type="success" icon="el-icon-check" circle plain style="margin-left:10px;"></el-button>
+            <el-button type="success" icon="el-icon-check" circle plain style="margin-left:10px;" @click="showHideDrawerFn(row,$index)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -118,15 +112,27 @@
         </span>
       </div>
     </el-dialog>
+    <el-drawer ref="drawer" title="分配权限" :before-close="closeDrawer" :visible.sync="table.roleDrawer.showHideDrawer" direction="rtl">
+      <div class="width-100" style="height:94vh;overflow-y:auto;">
+        <div class="width-100">
+          <el-tree ref="roleTree" :data="table.roleDrawer.dataList" show-checkbox node-key="id" default-expand-all :default-checked-keys="table.roleDrawer.checkedKeys" :props="table.roleDrawer.defaultProps"></el-tree>
+        </div>
+        <div class="flex width-100 position-sticky-bottom justify-center">
+          <el-button @click="$refs.drawer.closeDrawer()">取 消</el-button>
+          <el-button type="primary" @click="selectRole">确 定</el-button>
+        </div>
+      </div>
+    </el-drawer>
   </div>
 </template>
 <script>
 //这里可以import(导入)其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
+import TreeRoleList from '../tree/TreeRoleList'
 import ExportExcel from 'plugins/exportExcel'
 export default {
-  components: {},
-  props:{/**接受父组件传值*/ },
-  name:'Users',
+  components: {TreeRoleList},
+  props:{/**接受父组件传值*/},
+  name:'Role',
   data() {
     return {
       table:{
@@ -157,6 +163,21 @@ export default {
           /**添加时没有id,编辑时有id */
           form:{},
         },
+        /**权限抽屉数据 */
+        roleDrawer:{
+          /**显隐 */
+          showHideDrawer:false,
+          dataList:[],
+          /**当前打开谁的权限 */
+          currentRoleId:-1,
+          /**要展开已拥有的节点 */
+          checkedKeys:[],
+          defaultProps: {
+            children: 'children',
+            label: 'authName'
+          },
+          // from:{}
+        }
         
       },
     };
@@ -164,23 +185,81 @@ export default {
   computed: {/**计算属性*/ },
   watch: {/**监听data数据变化*/ },
   created() {/**创建组件时执行(加载完成之前执行可以调用this,主要预处理数据)*/
-    this.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
+    this.getRloes()
   },
   methods: {/**所有方法*/
     /**用户列表*/
-    async getUsers(currentPage,handleSize,keyword=''){
-      const res = await this.$request.user.getUsers({pagenum:currentPage,pagesize:handleSize,query:keyword == '' ? '':keyword})
-      const {users,total} = res.data.data
-      this.table.dataList = users,
-      this.table.pagination.total = total
+    async getRloes(currentPage,handleSize,keyword=''){
+      const res = await this.$request.roles.getRloes()
+      const {data,meta:{status,msg}} = res.data
+      if(status == 200 ){
+        this.table.dataList = data
+      }else{ this.$message.error(msg) }
+    },
+    
+    /**显隐抽屉 */
+    showHideDrawerFn(row,$index,fn){
+      if(this.table.roleDrawer.showHideDrawer){
+        this.table.roleDrawer.showHideDrawer = false
+        this.table.roleDrawer.dataList=[]
+        this.table.roleDrawer.currentRoleId=-1
+        this.table.roleDrawer.checkedKeys=[]
+      }else{
+        this.getRights(()=>{
+          this.table.roleDrawer.currentRoleId = row.id
+          this.table.roleDrawer.checkedKeys = treePush([],row.children)
+          this.table.roleDrawer.showHideDrawer = true
+        })
+      }
+      return typeof fn == 'function' && fn()
+      /**递归 */
+      function treePush(arr,data){
+        data.forEach((item) => {
+          if('children' in item){
+            treePush(arr,item.children)
+          }else{
+            arr.push(item.id)
+          }
+        })
+        return arr
+      }
+    },
+    /**关闭抽屉前的回调 */
+    closeDrawer(done){
+      this.$confirm('确定要关闭抽屉吗？')
+      .then(()=> {done();})
+      .catch(()=> {});
+    },
+    /**权限树*/
+    async getRights(fn){
+      const res = await this.$request.roles.getRights({type:'tree'})
+      const {data,meta:{msg,status}} = res.data
+      if(status == 200){
+        this.table.roleDrawer.dataList = data
+        return typeof fn == 'function' && fn()
+      }else{ this.$message.error(msg) }
+    },
+    /**提交权限 */
+    async selectRole(){
+      const checkedKeys = this.$refs.roleTree.getCheckedKeys()
+      const halfCheckedKeys = this.$refs.roleTree.getHalfCheckedKeys()
+      const concatArray = [...checkedKeys,...halfCheckedKeys]
+      const res = await this.$request.roles.setRoles({roleId:this.table.roleDrawer.currentRoleId,rids:concatArray.join(',')})
+      const {data,meta:{msg,status}} = res.data
+      if(status == 200){
+        this.$message.success(msg)
+        this.showHideDrawerFn('','',()=>{
+          this.getRloes()
+        })
+      }else{ this.$message.error(msg) }
     },
     /**刷新 */
     async refresh(){
       try{
         if(this.table.dataList.length == 0){
-          this.getUsers(1,this.table.pagination.handleSize)
+          this.getRloes()
         }else{
-          this.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
+          this.getRloes()
         }
         this.$notify.success({ title: '刷新成功', message: '最新数据已到达' });
       }catch(e){
@@ -189,11 +268,11 @@ export default {
     },
     search(){
       if(this.table.keyword != ''){
-        this.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize,this.table.keyword)
+        this.getRloes()
         return
       }
       if(this.table.keyword == '' && this.table.dataList.length == 0){
-        this.getUsers(1,this.table.pagination.handleSize)
+        this.getRloes()
         return
       }
       this.$message.error('请输入搜索内容')
@@ -205,7 +284,7 @@ export default {
       if(status == 201){
         this.$message.success(msg)
         this.showHideForm('','',0,()=>{
-          this.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
+          this.getRloes()
         })
       }else{
         this.$message.error(msg)
@@ -230,12 +309,12 @@ export default {
       if(status == 200){
         this.$notify.success({ title: msg, message: '最新数据已到达' });
         if(this.table.dataList.length > 1){
-          this.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
+          this.getRloes()
         }else{
           if(this.table.pagination.currentPage > 1){
-            this.getUsers(this.table.pagination.currentPage - 1,this.table.pagination.handleSize)
+            this.getRloes()
           }else{
-            this.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
+            this.getRloes()
           }
         }
       }else{this.$notify.error({ title:'失败' , message: msg });}
@@ -278,21 +357,13 @@ export default {
       if(status == 200){
         this.$message.success(msg)
         this.showHideForm('','',0,()=>{
-          this.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
+          this.getRloes()
         })
       }else{
         this.$message.error(msg)
       }
     },
-    /**快改 */
-    fastEdit(row, column){
-      // const {id} = row
-      // const {property} = column
-      // const fromDate = row[property]
-      // console.log(id);
-      // console.log(property);
-      // console.log(fromDate);
-    },
+
     /**开关 */
     async switchStatus(item){
       console.log(item);
@@ -302,17 +373,17 @@ export default {
         this.$message.success(msg)
       }else{this.$message.error(msg)
         this.showHideForm('','',0,()=>{
-          this.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
+          this.getRloes()
         })
       }
     },
     /**分页 切换每页条数 */
     handleSizeChange(val) {
-      this.getUsers(this.table.pagination.currentPage,val)
+      this.getRloes()
     },
     /**分页 切换页码 */
     handleCurrentChange(val) {
-      this.getUsers(val,this.table.pagination.handleSize)
+      this.getRloes()
     },
     /**导出Excel表格*/
     exportExcel() {
@@ -332,5 +403,6 @@ export default {
 }
 </script>
 <style scoped>
-  .cursor{ cursor:pointer }
+  .cursor{ cursor:pointer;}
+
 </style>

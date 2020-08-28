@@ -67,11 +67,8 @@ let forDate = (timestamp,num=1) => {
       return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
     }
 }
-/**表格导出excel */
-let exportExcel = (table_id) =>{
-  
-}
+
 export default {
   sexIdcardFilter,IDcardHide,telHide,nameHide,
-  forDate, exportExcel
+  forDate
 }

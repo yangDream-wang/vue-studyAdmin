@@ -22,28 +22,14 @@
       <el-container>
         <el-aside class="aside">
           <el-menu unique-opened router>
-            <el-submenu index="user">
+            <el-submenu :index="''+item.order" v-for="(item) in menus" :key="item.id">
               <template slot="title">
                 <i class="el-icon-location"></i>
-                <span>用户管理</span>
+                <span>{{item.authName}}</span>
               </template>
-              <el-menu-item index="users">
+              <el-menu-item :index="childrenItem.path" v-for="childrenItem in item.children" :key="childrenItem.id">
                 <i class="el-icon-menu"></i>
-                <span slot="title">用户列表</span>
-              </el-menu-item>
-            </el-submenu>
-            <el-submenu index="role">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>导航二</span>
-              </template>
-              <el-menu-item index="2-1">
-                <i class="el-icon-menu"></i>
-                <span slot="title">选项一</span>
-              </el-menu-item>
-              <el-menu-item index="2-2">
-                <i class="el-icon-menu"></i>
-                <span slot="title">选项二</span>
+                <span slot="title">{{childrenItem.authName}}</span>
               </el-menu-item>
             </el-submenu>
           </el-menu>
@@ -64,24 +50,23 @@ export default {
   name:'Home',
   data() {
     return {
-
+      menus:[]
     };
   },
   computed: {/**计算属性*/ },
   watch: {/**监听data数据变化*/ },
   created() {/**创建组件时执行(加载完成之前执行可以调用this,主要预处理数据)*/
-      this.getToken()
+    this.getMenus()
   },
   methods: {/**所有方法*/
+    async getMenus(){
+      const res = await this.$request.login.getMenus()
+      const {data,meta:{msg,status}} = res.data
+      if(status == 200){ this.menus = data }else{this.$message.error(msg)}
+    },
     outLogin(){
       if(sessionStorage.getItem('token')){
         sessionStorage.removeItem('token')
-        this.getToken()
-      }
-    },
-    getToken(){
-      const token = sessionStorage.getItem('token')
-      if(!token){
         this.$router.replace('/login')
       }
     },

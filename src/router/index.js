@@ -7,12 +7,15 @@ import VueRouter from 'vue-router'
 const Login = () => import('../components/login/Login.vue')
 const Home = () => import('../components/home/Home.vue')
 const Users = () => import('../components/user/users.vue')
+const Rights = () => import('../components/roles/Rights.vue')
+const Roles = () => import('../components/roles/Role.vue')
+const Node = () => import('../components/roles/Node.vue')
 const A404 = () => import('../views/404')
 
 Vue.use(VueRouter)
 
   const routes = [
-    { path:'/', redirect:'/home' },
+    { path:'/', redirect:'/Home' },
     // {
     //   path: '/login',
     //   component: Login,
@@ -41,8 +44,36 @@ Vue.use(VueRouter)
         },
         {
           path:'/users',
-          component:Users
-        }
+          component:Users,
+          meta: {
+            title: '用户列表',
+            keepAlive: true
+          }
+        },
+        {
+          path: '/rights',
+          component: Rights,
+          meta: {
+            title: '权限列表',
+            keepAlive: true
+          }
+        },
+        {
+          path: '/roles',
+          component: Roles,
+          meta: {
+            title: '角色列表',
+            keepAlive: true
+          }
+        },
+        {
+          path: '/node',
+          component: Node,
+          meta: {
+            title: '节点列表',
+            keepAlive: true
+          }
+        },
       ],
       meta: {
         title: '后台管理系统',
@@ -64,24 +95,22 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
-/*******路由发生变化前***** */
-// router.beforeEach((to, from, next) => {
-//   if (to.meta.title) {
-//     document.title = to.meta.title
-//   }
-//   // 获取用户登录状态
-//   let isLogin = localStorage.getItem("token");
-  
-//   // 如果请求的是登录页
-//   if (to.path == '/login') {
-//     if (isLogin != null) {
-//       // 跳转到首页
-//       next({
-//         path: '/index'
-//       });
-//     }
-//   }
-//   next()
-// })
+/*******路由生效前***** */
+router.beforeEach((to, from, next) => {
+  // 获取用户登录状态
+  const token = sessionStorage.getItem('token')
+  if (to.path != '/login'){
+    if (!token) {
+      next({path:'/login'})
+    }
+  }
+  // 如果请求的是登录页
+  if (to.path == '/login') {
+    if (token) {
+      next({path: '/home'});
+    }
+  }
+  next()
+})
 /*********************************** */
 export default router

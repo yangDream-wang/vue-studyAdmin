@@ -3,8 +3,11 @@ body,
 #app {
     height: 100%;
 }
+
 body {
-    /* Color 可以自定义相关配色 *//* var属性兼容性 --> https://www.caniuse.com/#feat=css-variables *//* 标准色 */
+    /* Color 可以自定义相关配色 */
+    /* var属性兼容性 --> https://www.caniuse.com/#feat=css-variables */
+    /* 标准色 */
     --red: #e54d42;
     --orange: #f37b1d;
     --yellow: #fbbd08;
@@ -21,7 +24,8 @@ body {
     --darkGray: #666;
     --gray: #aaa;
     --ghostWhite: #f1f1f1;
-    --white: #fff; /* 浅色 */
+    --white: #fff;
+    /* 浅色 */
     --redLight: #fadbd9;
     --orangeLight: #fde6d2;
     --yellowLight: #fef2ce;
@@ -33,14 +37,16 @@ body {
     --mauveLight: #ebd4ef;
     --pinkLight: #f9d7ea;
     --brownLight: #ede1d9;
-    --greyLight: #e7ebed; /* 渐变色 */
+    --greyLight: #e7ebed;
+    /* 渐变色 */
     --gradualRed: linear-gradient(45deg, #f43f3b, #ec008c);
     --gradualOrange: linear-gradient(45deg, #ff9700, #ed1c24);
     --gradualGreen: linear-gradient(45deg, #39b54a, #8dc63f);
     --gradualPurple: linear-gradient(45deg, #9000ff, #5e00ff);
     --gradualPink: linear-gradient(45deg, #ec008c, #6739b6);
     --gradualBlue: linear-gradient(45deg, #0081ff, #1cbbb4);
-    --dataColor: linear-gradient(45deg, #39dfd6, #a183e8); /* 阴影透明色 */
+    --dataColor: linear-gradient(45deg, #39dfd6, #a183e8);
+    /* 阴影透明色 */
     --ShadowSize: 6rpx 6rpx 8rpx;
     --redShadow: rgba(204, 69, 59, 0.2);
     --orangeShadow: rgba(217, 109, 26, 0.2);
@@ -61,11 +67,13 @@ body {
     color: var(--black);
     font-family: Helvetica Neue, Helvetica, sans-serif;
 }
+
 .bg-img {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
+
 .bg-mask {
     background-color: var(--black);
     position: relative;
@@ -84,6 +92,7 @@ body {
     bottom: 0;
     top: 0;
 }
+
 .bg-red {
     background-color: var(--red);
     color: var(--white);
@@ -266,42 +275,51 @@ body {
     color: var(--white);
 }
 
-.radius{
+.radius {
     border-radius: 10px;
 }
+
 /* ==================布局 ==================== */
-.opacity{
+.opacity {
     opacity: 0.5;
 }
-.position-fixed{
+
+.position-fixed {
     position: fixed;
 }
-.position-abs{
+
+.position-abs {
     position: absolute;
 }
-.position-rel{
+
+.position-rel {
     position: relative;
 }
-.position-sticky{
+
+.position-sticky {
     position: sticky;
     top: 0;
     z-index: 99;
 }
-.position-sticky-bottom{
+
+.position-sticky-bottom {
     position: sticky;
-    bottom:0;
+    bottom: 0;
     z-index: 99;
 }
+
 /*  -- flex弹性布局 -- */
 
 .flex {
     display: flex;
 }
-.flex-center{
+
+.flex-center {
     display: flex;
     justify-content: center;
     align-items: center;
 }
+
 .basis-xs {
     flex-basis: 20%;
 }
@@ -362,6 +380,10 @@ body {
     align-items: center;
 }
 
+.align-around {
+    align-content: space-around;
+}
+
 .align-stretch {
     align-items: stretch;
 }
@@ -402,87 +424,113 @@ body {
     justify-content: space-around;
 }
 
-.border-red{
+.border-red {
     border: 1px solid red;
 }
-.border-yellow{
+
+.border-yellow {
     border: 1px solid yellow;
 }
-.border-blue{
+
+.border-blue {
     border: 1px solid blue;
 }
-.border-cyan{
+
+.border-cyan {
     border: 1px solid cyan;
 }
-.border-block{
+
+.border-block {
     border: 1px solid black;
 }
-.width-height-100{
+
+.width-height-100 {
     width: 100%;
     height: 100%;
 }
-.width-100{
+
+.width-100 {
     width: 100%;
 }
-.width-10{
+
+.width-10 {
     width: 10%;
 }
-.width-20{
+
+.width-20 {
     width: 20%;
 }
-.width-30{
+
+.width-30 {
     width: 30%;
 }
-.width-40{
+
+.width-40 {
     width: 40%;
 }
-.width-50{
+
+.width-50 {
     width: 50%;
 }
-.width-60{
+
+.width-60 {
     width: 60%;
 }
-.width-70{
+
+.width-70 {
     width: 70%;
 }
-.width-80{
+
+.width-80 {
     width: 80%;
 }
-.width-90{
+
+.width-90 {
     width: 90%;
 }
-.height-100{
-    height:100%;
+
+.height-100 {
+    height: 100%;
 }
-.height-10{
-    height:10%;
+
+.height-10 {
+    height: 10%;
 }
-.height-20{
-    height:20%;
+
+.height-20 {
+    height: 20%;
 }
-.height-30{
-    height:30%;
+
+.height-30 {
+    height: 30%;
 }
-.height-40{
-    height:40%;
+
+.height-40 {
+    height: 40%;
 }
-.height-50{
-    height:50%;
+
+.height-50 {
+    height: 50%;
 }
-.height-60{
-    height:60%;
+
+.height-60 {
+    height: 60%;
 }
-.height-70{
-    height:70%;
+
+.height-70 {
+    height: 70%;
 }
-.height-80{
-    height:80%;
+
+.height-80 {
+    height: 80%;
 }
-.height-90{
-    height:90%;
+
+.height-90 {
+    height: 90%;
 }
+
 /* 文字两行省略 */
-.text-cuts{
+.text-cuts {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -851,7 +899,7 @@ body {
 .text-price::before {
     content: "¥";
     font-size: 80%;
-    margin-right:8px;
+    margin-right: 8px;
 }
 
 .text-cut {
@@ -880,62 +928,92 @@ body {
     text-align: right;
 }
 
-.text-red, .line-red, .lines-red {
+.text-red,
+.line-red,
+.lines-red {
     color: var(--red);
 }
 
-.text-orange, .line-orange, .lines-orange {
+.text-orange,
+.line-orange,
+.lines-orange {
     color: var(--orange);
 }
 
-.text-yellow, .line-yellow, .lines-yellow {
+.text-yellow,
+.line-yellow,
+.lines-yellow {
     color: var(--yellow);
 }
 
-.text-olive, .line-olive, .lines-olive {
+.text-olive,
+.line-olive,
+.lines-olive {
     color: var(--olive);
 }
 
-.text-green, .line-green, .lines-green {
+.text-green,
+.line-green,
+.lines-green {
     color: var(--green);
 }
 
-.text-cyan, .line-cyan, .lines-cyan {
+.text-cyan,
+.line-cyan,
+.lines-cyan {
     color: var(--cyan);
 }
 
-.text-blue, .line-blue, .lines-blue {
+.text-blue,
+.line-blue,
+.lines-blue {
     color: var(--blue);
 }
 
-.text-purple, .line-purple, .lines-purple {
+.text-purple,
+.line-purple,
+.lines-purple {
     color: var(--purple);
 }
 
-.text-mauve, .line-mauve, .lines-mauve {
+.text-mauve,
+.line-mauve,
+.lines-mauve {
     color: var(--mauve);
 }
 
-.text-pink, .line-pink, .lines-pink {
+.text-pink,
+.line-pink,
+.lines-pink {
     color: var(--pink);
 }
 
-.text-brown, .line-brown, .lines-brown {
+.text-brown,
+.line-brown,
+.lines-brown {
     color: var(--brown);
 }
 
-.text-grey, .line-grey, .lines-grey {
+.text-grey,
+.line-grey,
+.lines-grey {
     color: var(--grey);
 }
 
-.text-gray, .line-gray, .lines-gray {
+.text-gray,
+.line-gray,
+.lines-gray {
     color: var(--gray);
 }
 
-.text-black, .line-black, .lines-black {
+.text-black,
+.line-black,
+.lines-black {
     color: var(--black);
 }
 
-.text-white, .line-white, .lines-white {
+.text-white,
+.line-white,
+.lines-white {
     color: var(--white);
 }
