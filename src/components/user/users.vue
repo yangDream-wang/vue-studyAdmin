@@ -37,45 +37,23 @@
       stripe:显示斑马纹
       border:显示边框(可以拖动列宽)
       @selection-change:多选改变事件
-      @cell-click="fastEdit":点击某一个单元格事件
-      
       -->
-      <el-table id="table" ref="table" :data="table.dataList" highlight-current-row stripe border @selection-change="selectionChange" @cell-click="fastEdit">
+      <el-table id="table" ref="table" :data="table.dataList" highlight-current-row stripe border @selection-change="selectionChange">
         <el-table-column type="selection" width="50"></el-table-column>
         <el-table-column prop="id" sortable label="ID" width="100"/>
         <el-table-column prop="username" label="姓名"/>
         <el-table-column prop="role_name" label="角色"/>
         <el-table-column prop="mobile" label="手机号">
-          <template slot-scope="{row,column,$index}"> <!-- 快速编辑 start-->
-            <el-popover placement="top-start" width="250" trigger="click"> 
-              <div class="flex align-center width-100">
-                <div class="width-60 padding-right-sm"><el-input v-model="table.fastForm.editData" size="mini" clearable prefix-icon="el-icon-edit" @keyup.enter.native="fastEditSubmit($index,column.id)"></el-input></div>
-                <div class="width-40">
-                  <el-button-group>
-                    <el-button type="success" :loading="table.fastForm.status" icon="el-icon-check" size="mini" @click="fastEditSubmit($index,column.id)"></el-button>
-                    <el-button type="info" icon="el-icon-close" size="mini" plain @click="fastEditReset($index,column.id)"></el-button>
-                  </el-button-group>
-                </div>
-              </div>
-              <el-button type="text" slot="reference" :id="'popover' + $index + column.id">{{row.mobile}}</el-button>
-            </el-popover>
-          </template><!-- 快速编辑 end-->
+          <template slot-scope="{row,column,$index}">
+            <!-- 快速编辑 -->
+            <table-fast-edit ref="tableFastEdit" :row="row" :column="column" :index="$index" type="mobile" origin="true" value="false" @fastEditSubmit="fastEditSubmit"></table-fast-edit>
+          </template>
         </el-table-column>
         <el-table-column prop="email" label="邮箱">
-          <template slot-scope="{row,column,$index}"> <!-- 快速编辑 start-->
-            <el-popover placement="top-start" width="250" trigger="click"> 
-              <div class="flex align-center width-100">
-                <div class="width-60 padding-right-sm"><el-input v-model="table.fastForm.editData" size="mini" clearable prefix-icon="el-icon-edit" @keyup.enter.native="fastEditSubmit($index,column.id)"></el-input></div>
-                <div class="width-40">
-                  <el-button-group>
-                    <el-button type="success" :loading="table.fastForm.status" icon="el-icon-check" size="mini" @click="fastEditSubmit($index,column.id)"></el-button>
-                    <el-button type="info" icon="el-icon-close" size="mini" plain @click="fastEditReset($index,column.id)"></el-button>
-                  </el-button-group>
-                </div>
-              </div>
-              <el-button type="text" slot="reference" :id="'popover' + $index + column.id">{{row.email}}</el-button>
-            </el-popover>
-          </template><!-- 快速编辑 end-->
+          <template slot-scope="{row,column,$index}">
+            <!-- 快速编辑 -->
+            <table-fast-edit ref="tableFastEdit" :row="row" :column="column" :index="$index" type="email" origin="true" @fastEditSubmit="fastEditSubmit"></table-fast-edit>
+          </template>
         </el-table-column>
         <el-table-column label="创建时间" sortable prop="create_time">
           <template slot-scope="{row}">
@@ -175,8 +153,9 @@
 <script>
 //这里可以import(导入)其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 import ExportExcel from 'plugins/exportExcel'
+import tableFastEdit from '../../components/common/tableFastEdit'
 export default {
-  components: {},
+  components: {tableFastEdit},
   props:{/**接受父组件传值*/ },
   name:'Users',
   data() {
@@ -328,44 +307,16 @@ export default {
         })
       }else{ this.$message.error(msg) }
     },
-    /**快改 */
-    fastEdit(row, column){
-      this.table.fastForm = {editData:'',status:false}
-      const {id} = row
-      const {property} = column
-      const fromDate = row[property]
-      const fastEditData = { id:id, field:property, OriginalData:fromDate }
-      this.table.fastForm = {...this.table.fastForm,...fastEditData}
-    },
-    /**快改提交 */
-    fastEditSubmit(index,id){
-      if(this.table.fastForm.length <= 1){this.$message.error('快速编辑失败');return}
-      if(!this.table.fastForm.editData){this.$message.error('请输入数据!');return}
-      if(this.table.fastForm.OriginalData == this.table.fastForm.editData){this.$message.info('数据相同不会更改哦');return}
-      if(this.table.fastForm.hasOwnProperty('OriginalData')){delete this.table.fastForm.OriginalData}
-      this.table.fastForm.status = true
-      console.log(`提交的编辑数据`,this.table.fastForm);/**提交的编辑数据 */
+    /**快改事件 */
+    fastEditSubmit(e){
+      console.log(e);return
       setTimeout(()=>{
         this.getUsers(this.table.pagination.currentPage,this.table.pagination.handleSize)
-        this.imitateClick(index,id,()=>{
-          this.table.fastForm.status = false
-          this.$message.success('success!')
-        })
+        this.$message.success('更改成功')
+        this.$refs.tableFastEdit.done(e.current.index,e.current.id)
       },1000)
     },
-    /**快改 模拟点击方法*/
-    imitateClick(index,id,fn){
-      var e = document.createEvent('MouseEvents')
-      e.initEvent('click', true, true)
-      document.getElementById('popover'+index+id).dispatchEvent(e)
-      return typeof fn == 'function' && fn()
-    },
-    /**快改取消 */
-    fastEditReset(index,id){
-      this.imitateClick(index,id,()=>{
-        this.$message.success('success!')
-      })
-    },
+
     /**开关 */
     async switchStatus(item){
       console.log(item);
